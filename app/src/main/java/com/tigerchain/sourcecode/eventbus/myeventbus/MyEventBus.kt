@@ -72,32 +72,40 @@ class MyEventBus private constructor(){
             run {
                 val list = cacheMap?.get(k)
                 list?.let {
-                    for (subscribeMethod in list) {
-                        when(subscribeMethod.threadMode){
-                            ThreadMode.MAIN_THREAD -> {
-                                if(Looper.myLooper() == Looper.getMainLooper()){ // 如果在线程发送事件，则直接在主线程响应
-                                    invoke(subscribeMethod, k, type)
-                                }else {
-                                    handler?.post{ //如果在线程送事件，则要把事件发送到主线程响应
-                                        invoke(subscribeMethod, k, type)
-                                    }
-                                }
-                            }
-                            ThreadMode.SUB_THREAD -> {
-                                if(Looper.myLooper()!= Looper.getMainLooper()) {
-                                    invoke(subscribeMethod,k,type)
-                                }else {
-                                    val executeService = Executors.newFixedThreadPool(5)
-                                    executeService.execute{
-                                        invoke(subscribeMethod,k,type)
-                                    }
+                    interatorSubscribeMethods(list, k, type)
+                }
 
-                                }
-                            }
+            }
+        }
+    }
+
+    private fun interatorSubscribeMethods(
+        list: List<SubscribeMethod>,
+        k: Any,
+        type: Any
+    ) {
+        for (subscribeMethod in list) {
+            when (subscribeMethod.threadMode) {
+                ThreadMode.MAIN_THREAD -> {
+                    if (Looper.myLooper() == Looper.getMainLooper()) { // 如果在线程发送事件，则直接在主线程响应
+                        invoke(subscribeMethod, k, type)
+                    } else {
+                        handler?.post { //如果在线程送事件，则要把事件发送到主线程响应
+                            invoke(subscribeMethod, k, type)
                         }
                     }
                 }
+                ThreadMode.SUB_THREAD -> {
+                    if (Looper.myLooper() != Looper.getMainLooper()) {
+                        invoke(subscribeMethod, k, type)
+                    } else {
+                        val executeService = Executors.newFixedThreadPool(5)
+                        executeService.execute {
+                            invoke(subscribeMethod, k, type)
+                        }
 
+                    }
+                }
             }
         }
     }
