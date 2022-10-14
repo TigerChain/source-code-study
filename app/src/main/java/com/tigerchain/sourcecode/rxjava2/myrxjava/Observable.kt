@@ -21,7 +21,6 @@ class Observable<T>(private val onSubscribe: OnSubscribe<T>?) {
         fun call(subscriber: Subscriber<in T>)
     }
 
-
     fun <R> map(transformer : Fun1<T, R>): Observable<R> {
 
         return create(object : OnSubscribe<R>{
