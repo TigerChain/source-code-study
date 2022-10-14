@@ -81,4 +81,14 @@ class Observable<T>(private val onSubscribe: OnSubscribe<T>?) {
         }
 
     }
+
+    fun subscribeOn(scheduler: Scheduler):Observable<T> {
+        return create(object :OnSubscribe<T>{
+            override fun call(subscriber: Subscriber<in T>) {
+                scheduler.createWorker().schedule{
+                    onSubscribe?.call(subscriber)
+                }
+            }
+        })
+    }
 }
