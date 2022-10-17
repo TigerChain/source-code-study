@@ -1,7 +1,6 @@
 
 package com.tigerchain.sourcecode.retrofit.my_network
 
-import IJsonDataTransformListener
 import com.tigerchain.sourcecode.retrofit.my_network.domain.ApiResponseData
 
 fun main() {
